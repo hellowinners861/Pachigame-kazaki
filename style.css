@@ -1,0 +1,332 @@
+/* ============================================================
+   NEON CAT PACHI - スタイル
+   デザイントークン: ピンクネオン × 黒筐体 × ゴールド(大当り)
+   画像差し替え: .lcd-bg / .character に background-image を
+   script.js の ASSETS から適用する構造
+   ============================================================ */
+
+:root {
+  --bg: #0a0510;
+  --chassis: #16101e;
+  --chassis-edge: #2a1b38;
+  --neon-pink: #ff3fa4;
+  --neon-pink-soft: #ff8fd0;
+  --neon-purple: #b04cff;
+  --gold: #ffd76a;
+  --hot-red: #ff4040;
+  --text: #f5eefa;
+  --dim: #9b8aad;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: radial-gradient(1200px 800px at 50% -10%, #241033, var(--bg));
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+#app {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+  align-items: stretch;
+}
+
+/* ============ 筐体 ============ */
+.machine {
+  flex: 1.4;
+  background: linear-gradient(180deg, var(--chassis-edge), var(--chassis) 30%, #0d0814);
+  border: 2px solid #3a2450;
+  border-radius: 22px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 0 40px rgba(255, 63, 164, .15), inset 0 0 30px rgba(0,0,0,.6);
+  position: relative;
+}
+
+/* 画面揺れ */
+.machine.shake { animation: shake .4s linear; }
+@keyframes shake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(5px, -4px); }
+  60% { transform: translate(-4px, -3px); }
+  80% { transform: translate(4px, 3px); }
+}
+
+/* ランプ帯: 通常はゆっくり、excited クラスで高速点滅 */
+.lamp-strip {
+  height: 14px;
+  border-radius: 8px;
+  background: repeating-linear-gradient(90deg,
+    var(--neon-pink) 0 18px, #3a1030 18px 36px);
+  opacity: .5;
+  animation: lampFlow 2.4s linear infinite;
+  background-size: 72px 100%;
+}
+.lamp-strip.excited { opacity: 1; animation: lampFlow .3s linear infinite; box-shadow: 0 0 16px var(--neon-pink); }
+.lamp-strip.gold { background: repeating-linear-gradient(90deg, var(--gold) 0 18px, #4a3a10 18px 36px); box-shadow: 0 0 18px var(--gold); opacity: 1; animation: lampFlow .25s linear infinite; }
+@keyframes lampFlow { to { background-position: 72px 0; } }
+
+/* ============ 液晶 ============ */
+.lcd {
+  position: relative;
+  flex: 1;
+  min-height: 330px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 3px solid #000;
+  background: #05030a;
+}
+
+.lcd-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 65%, rgba(255,63,164,.45), transparent 60%),
+    radial-gradient(ellipse at 20% 20%, rgba(176,76,255,.35), transparent 55%),
+    linear-gradient(180deg, #1a0a26, #0a0512);
+  background-size: cover; background-position: center;
+  transition: filter .5s;
+}
+/* リーチ・SP発展時の背景変化 */
+.lcd.bg-reach .lcd-bg { filter: hue-rotate(-20deg) brightness(1.2); }
+.lcd.bg-sp1 .lcd-bg { filter: hue-rotate(30deg) brightness(1.3) saturate(1.4); }
+.lcd.bg-sp2 .lcd-bg { filter: hue-rotate(120deg) brightness(1.5) saturate(1.8); }
+.lcd.bg-rush .lcd-bg { filter: hue-rotate(-60deg) brightness(1.4) saturate(1.6); }
+
+.character {
+  position: absolute;
+  left: 50%; bottom: 6%;
+  transform: translateX(-50%);
+  font-size: 110px;
+  filter: drop-shadow(0 0 24px rgba(255,63,164,.8));
+  animation: charFloat 3s ease-in-out infinite;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+@keyframes charFloat { 50% { transform: translateX(-50%) translateY(-10px); } }
+
+/* ============ 図柄リール ============ */
+.reels {
+  position: absolute;
+  top: 14%; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 12px;
+  z-index: 5;
+}
+.reel {
+  width: 74px; height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 62px; font-weight: 900;
+  font-family: "Arial Black", sans-serif;
+  color: var(--gold);
+  background: linear-gradient(180deg, rgba(0,0,0,.75), rgba(30,10,40,.75));
+  border: 2px solid var(--neon-pink);
+  border-radius: 12px;
+  text-shadow: 0 0 12px rgba(255,215,106,.9);
+  box-shadow: 0 0 14px rgba(255,63,164,.4), inset 0 0 18px rgba(0,0,0,.8);
+}
+.reel.spinning { color: var(--neon-pink-soft); filter: blur(1.5px); }
+.reel.stopped { animation: reelPop .25s ease-out; }
+@keyframes reelPop { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.reel.win { animation: reelWin .5s ease-in-out infinite alternate; border-color: var(--gold); }
+@keyframes reelWin { to { box-shadow: 0 0 30px var(--gold); transform: scale(1.08); } }
+
+/* ============ 保留 ============ */
+.hold-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 14px;
+  background: rgba(0,0,0,.4);
+  border-radius: 12px;
+}
+.hold-label { font-size: 12px; color: var(--dim); letter-spacing: .2em; }
+.hold-orb {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15);
+  background: radial-gradient(circle at 35% 30%, #fff, var(--orb, #ff8fd0) 55%, #802050);
+  box-shadow: 0 0 10px var(--orb, #ff8fd0);
+  transition: transform .2s;
+}
+.hold-orb.empty { background: #1c1226; box-shadow: none; }
+.hold-orb.c-white  { --orb: #e8e0f5; }
+.hold-orb.c-blue   { --orb: #4aa8ff; }
+.hold-orb.c-green  { --orb: #4aff9d; }
+.hold-orb.c-red    { --orb: #ff4040; animation: orbPulse .6s infinite alternate; }
+.hold-orb.c-rainbow {
+  background: conic-gradient(#ff4040,#ffd76a,#4aff9d,#4aa8ff,#b04cff,#ff4040);
+  animation: orbSpin 1.2s linear infinite, orbPulse .5s infinite alternate;
+}
+@keyframes orbPulse { to { transform: scale(1.25); } }
+@keyframes orbSpin { to { filter: hue-rotate(360deg); } }
+
+/* ============ 演出レイヤー ============ */
+.hidden { display: none !important; }
+
+.yokoku {
+  position: absolute; top: 46%; left: 0; right: 0;
+  text-align: center;
+  font-size: 30px; font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 14px var(--neon-pink), 0 0 30px var(--neon-pink);
+  z-index: 8;
+  animation: yokokuIn .4s ease-out;
+}
+.yokoku.hot { color: var(--hot-red); text-shadow: 0 0 16px var(--hot-red), 0 0 40px var(--hot-red); font-size: 36px; }
+.yokoku.rainbow { animation: yokokuIn .4s ease-out, orbSpin 1s linear infinite; color: var(--gold); }
+@keyframes yokokuIn { 0% { transform: scale(2.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.cutin {
+  position: absolute; top: 38%; left: 0; right: 0;
+  padding: 14px 0;
+  text-align: center;
+  font-size: 34px; font-weight: 900;
+  background: linear-gradient(90deg, transparent, rgba(255,63,164,.85), transparent);
+  z-index: 9;
+  animation: cutinSlide .35s ease-out;
+}
+.cutin.gold { background: linear-gradient(90deg, transparent, rgba(255,180,30,.9), transparent); color: #3a2000; }
+@keyframes cutinSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(0); } }
+
+.reach-label {
+  position: absolute; top: 6%; left: 0; right: 0;
+  text-align: center;
+  font-size: 40px; font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 18px var(--hot-red);
+  z-index: 8;
+  animation: reachBlink .5s infinite alternate;
+}
+@keyframes reachBlink { to { opacity: .35; } }
+
+.mode-banner {
+  position: absolute; top: 2%; left: 50%; transform: translateX(-50%);
+  padding: 4px 18px;
+  font-size: 18px; font-weight: 900;
+  color: #fff;
+  background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+  border-radius: 999px;
+  z-index: 7;
+  box-shadow: 0 0 20px var(--neon-pink);
+}
+.st-info {
+  position: absolute; top: 9%; left: 50%; transform: translateX(-50%);
+  font-size: 13px; color: var(--neon-pink-soft); z-index: 7;
+}
+
+.jackpot-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: rgba(10,2,16,.82);
+  z-index: 20;
+}
+.jackpot-text {
+  font-size: 58px; font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold), 0 0 60px var(--hot-red);
+  animation: jackpotZoom .6s ease-out, reelWin .6s .6s infinite alternate;
+}
+.jackpot-text.premium { animation: jackpotZoom .6s ease-out, orbSpin 1s linear infinite; }
+@keyframes jackpotZoom { 0% { transform: scale(.2) rotate(-8deg); opacity: 0; } 70% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+.round-text { font-size: 26px; font-weight: 700; color: #fff; }
+
+/* 全画面フラッシュ */
+.flash {
+  position: absolute; inset: 0;
+  background: #fff;
+  opacity: 0; pointer-events: none;
+  z-index: 30;
+}
+.flash.go { animation: flashAnim .45s ease-out; }
+.flash.gold-flash { background: var(--gold); }
+@keyframes flashAnim { 0% { opacity: .95; } 100% { opacity: 0; } }
+
+/* ============ 右パネル ============ */
+.side {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 12px;
+  background: rgba(20,12,30,.7);
+  border: 1px solid #3a2450;
+  border-radius: 18px;
+  padding: 16px;
+}
+.title {
+  font-size: 24px; font-weight: 900;
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: .04em;
+}
+.spec { font-size: 11px; color: var(--dim); }
+
+.stats { display: flex; flex-direction: column; gap: 8px; }
+.stat {
+  background: rgba(0,0,0,.35);
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.stat.big .stat-value { font-size: 32px; color: var(--neon-pink-soft); }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-label { font-size: 11px; color: var(--dim); }
+.stat-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#modeText.rush { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+.mini-btn {
+  margin-left: auto;
+  background: #2a1b38; color: var(--text);
+  border: 1px solid var(--neon-purple);
+  border-radius: 999px;
+  padding: 4px 10px; font-size: 12px;
+  cursor: pointer;
+}
+.mini-btn:active { transform: scale(.95); }
+
+.fire-btn {
+  padding: 18px;
+  font-size: 17px; font-weight: 800;
+  color: #fff;
+  background: linear-gradient(180deg, var(--neon-pink), #b0186e);
+  border: none; border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #6e0f45, 0 0 24px rgba(255,63,164,.4);
+}
+.fire-btn:active, .fire-btn.firing {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #6e0f45, 0 0 30px rgba(255,63,164,.7);
+}
+
+.auto-row { font-size: 14px; color: var(--dim); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+.history-box {
+  flex: 1;
+  background: rgba(0,0,0,.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.history-title { font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+.history { list-style: none; overflow-y: auto; font-size: 13px; }
+.history li { padding: 3px 0; border-bottom: 1px dashed #2a1b38; }
+.history li.rush { color: var(--gold); }
+.history-empty { color: var(--dim); }
+
+/* ============ レスポンシブ / アクセシビリティ ============ */
+@media (max-width: 720px) {
+  #app { flex-direction: column; }
+  .lcd { min-height: 300px; }
+  .character { font-size: 84px; }
+  .reel { width: 58px; height: 78px; font-size: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01s !important; }
+}

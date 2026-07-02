@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>NEON CAT PACHI - パチンコ風ゲーム</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== 筐体(左) ===== -->
+  <div class="machine" id="machine">
+
+    <!-- 上部ランプ帯 -->
+    <div class="lamp-strip" id="lampTop"></div>
+
+    <!-- ===== 液晶画面 ===== -->
+    <div class="lcd" id="lcd">
+      <!-- 背景レイヤー(画像差し替えポイント: ASSETS.lcdBg) -->
+      <div class="lcd-bg" id="lcdBg"></div>
+
+      <!-- キャラクターレイヤー(差し替えポイント: ASSETS.character) -->
+      <div class="character" id="character">🐱</div>
+
+      <!-- モード表示(RUSH中バナー) -->
+      <div class="mode-banner hidden" id="modeBanner">⚡ NEON RUSH ⚡</div>
+      <div class="st-info hidden" id="stInfo"></div>
+
+      <!-- 図柄(3リール) -->
+      <div class="reels" id="reels">
+        <div class="reel" id="reel0">7</div>
+        <div class="reel" id="reel1">7</div>
+        <div class="reel" id="reel2">7</div>
+      </div>
+
+      <!-- 演出レイヤー群 -->
+      <div class="yokoku hidden" id="yokoku"></div>
+      <div class="cutin hidden" id="cutin"></div>
+      <div class="reach-label hidden" id="reachLabel">リーチ!!</div>
+      <div class="jackpot-overlay hidden" id="jackpotOverlay">
+        <div class="jackpot-text" id="jackpotText">大当り!!</div>
+        <div class="round-text" id="roundText"></div>
+      </div>
+      <div class="flash" id="flash"></div>
+    </div>
+
+    <!-- 保留(最大4個) -->
+    <div class="hold-row" id="holdRow">
+      <div class="hold-label">保留</div>
+      <div class="hold-orb empty" id="hold0"></div>
+      <div class="hold-orb empty" id="hold1"></div>
+      <div class="hold-orb empty" id="hold2"></div>
+      <div class="hold-orb empty" id="hold3"></div>
+    </div>
+
+    <!-- 下部ランプ帯 -->
+    <div class="lamp-strip bottom" id="lampBottom"></div>
+  </div>
+
+  <!-- ===== 情報パネル(右) ===== -->
+  <div class="side">
+    <h1 class="title">NEON CAT PACHI</h1>
+    <div class="spec">1/319 ▸ RUSH突入60% ▸ ST160回転(継続約80%)</div>
+
+    <div class="stats">
+      <div class="stat big">
+        <span class="stat-label">持ち玉</span>
+        <span class="stat-value" id="ballCount">1000</span>
+        <button class="mini-btn" id="addBalls">+500 補給</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><span class="stat-label">回転数</span><span class="stat-value" id="spinCount">0</span></div>
+        <div class="stat"><span class="stat-label">大当り</span><span class="stat-value" id="hitCount">0</span></div>
+        <div class="stat"><span class="stat-label">発射数</span><span class="stat-value" id="launchCount">0</span></div>
+        <div class="stat"><span class="stat-label">状態</span><span class="stat-value" id="modeText">通常</span></div>
+      </div>
+    </div>
+
+    <button class="fire-btn" id="fireBtn">🚀 玉を打つ(長押し / Space)</button>
+
+    <label class="auto-row">
+      <input type="checkbox" id="autoChk"> 自動プレイ
+    </label>
+
+    <div class="history-box">
+      <div class="history-title">大当り履歴</div>
+      <ul class="history" id="history"><li class="history-empty">まだ大当りはありません</li></ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
