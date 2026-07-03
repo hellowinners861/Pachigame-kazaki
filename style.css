@@ -378,3 +378,12 @@ body {
 }
 /* 図柄の光彩を数字ごとの色に連動させる */
 .reel { text-shadow: 0 0 12px currentColor; }
+
+/* ===== 台画像を見切れさせない =====
+   液晶の縦横比はscript.jsが画像から自動設定する */
+.lcd {
+  flex: none;
+  min-height: 0;
+  max-height: 74vh;   /* 縦長画像でも画面からはみ出さない上限 */
+}
+.lcd-bg { background-size: contain; background-repeat: no-repeat; }
