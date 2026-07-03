@@ -20,22 +20,29 @@ const CONFIG = {
   lottery: {
     normalProb: 1 / 319,   // 通常時 大当り確率
     stProb:     1 / 99,    // ST中 大当り確率
-    rushEntry:  0.60,      // 初当り時のRUSH突入率
-    stSpins:    160,       // ST回転数 → 継続率 ≒ 1-(98/99)^160 ≒ 80%
+    rushEntry:  0.50,      // 初当り時のRUSH突入率 50%
+    stSpins:    119,       // ST回転数 → 継続率 ≒ 1-(98/99)^119 ≒ 70%
   },
   payout: {
-    normalRounds: 4,       // 通常当り(RUSH非突入)ラウンド数
-    rushRounds:   10,      // RUSH当りラウンド数
-    ballsPerRound: 140,    // 1Rあたりの出玉
-    startPay: 3,           // スタート入賞時の払い出し
+    normalRounds: 4,        // 通常当り(RUSH非突入)ラウンド数
+    rushEntryRounds: 10,    // 初当りでRUSH突入時のラウンド数
+    ballsPerRound: 140,     // 通常時の1Rあたり出玉
+    startPay: 3,            // スタート入賞時の払い出し
+    rushBallsPerRound: 300, // RUSH中は1R=300玉
+    rushPayouts: [          // RUSH中大当りの出玉振り分け
+      { w: 50, total: 3000 },
+      { w: 30, total: 4500 },
+      { w: 15, total: 6000 },
+      { w: 5,  total: 7500 },
+    ],
   },
   launch: {
-    interval: 110,         // 発射間隔(ms)
-    startRate: 0.14,       // スタート入賞率
+    interval: 110,
+    startRate: 0.14,
     initialBalls: 1000,
   },
-  timing: {                // ラウンド消化などの表示テンポ(ms)
-    roundTick: 650,
+  timing: {
+    roundTick: 450,         // 出玉加算テンポ(7500発でも長すぎないよう短縮)
     jackpotBanner: 2200,
     rushEndBanner: 2400,
   },
@@ -50,6 +57,8 @@ const ASSETS = {
   lcdBgRush:  "",   // RUSH中背景
   character:  "",   // キャラクター画像(空なら🐱)
   cutinImg:   "",   // カットイン画像(拡張用)
+  crackImg:   "",   // ひび割れ画像。空ならCSSの線で描画。
+                    // 背景画像を入れたら、その雰囲気に合う割れ画像に差し替え可
 };
 
 /* ============ 3. Utils ============ */
@@ -235,16 +244,16 @@ const Reels = (() => {
   return { spin, stop, spinAll, stopAll, markWin, decideDigits };
 })();
 
-/* ============ 6. FX(汎用エフェクト) ============ */
-const FX = (() => {
+/* ============ 6. FX(汎用エフェクト) ============ */const FX = (() => {
   const lcd = document.getElementById("lcd");
   const machine = document.getElementById("machine");
   const flash = document.getElementById("flash");
+  const crack = document.getElementById("crackLayer");
   const lamps = [document.getElementById("lampTop"), document.getElementById("lampBottom")];
 
   function doFlash(gold = false) {
     flash.classList.remove("go", "gold-flash");
-    void flash.offsetWidth;                 // reflowでアニメ再生し直し
+    void flash.offsetWidth;
     if (gold) flash.classList.add("gold-flash");
     flash.classList.add("go");
   }
@@ -253,18 +262,34 @@ const FX = (() => {
     void machine.offsetWidth;
     machine.classList.add("shake");
   }
-  function setBg(cls) {                     // "", "bg-reach", "bg-sp1", "bg-sp2", "bg-rush"
+  /* 大当りひび割れ: 背景の上に被せる。ASSETS.crackImg があれば画像を使用 */
+  function doCrack() {
+    if (ASSETS.crackImg) crack.style.backgroundImage = `url(${ASSETS.crackImg})`;
+    crack.classList.remove("hidden", "go");
+    void crack.offsetWidth;
+    crack.classList.add("go");
+    doShake(); doFlash(true);
+    setTimeout(() => crack.classList.add("hidden"), 2600);
+  }
+  /* 赤保留警告: 画面が赤く脈動 */
+  function alertRed() {
+    lcd.classList.remove("alert-red");
+    void lcd.offsetWidth;
+    lcd.classList.add("alert-red");
+    setTimeout(() => lcd.classList.remove("alert-red"), 3200);
+  }
+  function setBg(cls) {
     lcd.classList.remove("bg-reach", "bg-sp1", "bg-sp2", "bg-rush");
     if (cls) lcd.classList.add(cls);
   }
-  function lampMode(mode) {                 // "calm" | "excited" | "gold"
+  function lampMode(mode) {
     lamps.forEach(l => {
       l.classList.remove("excited", "gold");
       if (mode === "excited") l.classList.add("excited");
       if (mode === "gold") l.classList.add("gold");
     });
   }
-  return { flash: doFlash, shake: doShake, setBg, lampMode };
+  return { flash: doFlash, shake: doShake, setBg, lampMode, crack: doCrack, alertRed };
 })();
 
 /* ============ 7. Director(変動演出の再生) ============
@@ -331,6 +356,7 @@ const Director = (() => {
 
     // --- 予告 ---
     (p.yokoku || []).forEach(y => at(y.at, () => showYokoku(y.text, y.cls)));
+        if (holdColor === "red")     at(500, () => { showYokoku("赤保留!!", "hot"); FX.alertRed(); });
     if (holdColor === "gold")    at(500, () => showYokoku("金保留!!", "hot"));
     if (holdColor === "rainbow") at(500, () => showYokoku("虹保留!!", "rainbow"));
 
@@ -430,7 +456,7 @@ const Game = (() => {
   }
 
   function addHold() {
-    if (state.holds.length >= 4) return false;
+    if (state.holds.length >= 5) return false;   // 保留最大5
     state.holds.push(judgeNewHold());
     renderHolds();
     return true;
@@ -473,38 +499,56 @@ const Game = (() => {
   function jackpot(hold, pattern) {
     state.phase = "JACKPOT";
     state.hits++;
+    const inRush = state.mode === "RUSH";
     const rush = hold.rushHit;
-    const rounds = rush ? CONFIG.payout.rushRounds : CONFIG.payout.normalRounds;
+
+    // 出玉決定: RUSH中は振り分けテーブル / 通常時は従来ラウンド
+    let totalBalls, rounds, perRound;
+    if (inRush) {
+      totalBalls = weightedPick(CONFIG.payout.rushPayouts).total;
+      perRound   = CONFIG.payout.rushBallsPerRound;
+      rounds     = Math.round(totalBalls / perRound);
+    } else {
+      rounds     = rush ? CONFIG.payout.rushEntryRounds : CONFIG.payout.normalRounds;
+      perRound   = CONFIG.payout.ballsPerRound;
+      totalBalls = rounds * perRound;
+    }
 
     state.history.unshift({
-      spin: state.mode === "RUSH" ? "RUSH中" : state.spins + "回転",
-      label: pattern.name + " " + rounds + "R",
+      spin: inRush ? "RUSH中" : state.spins + "回転",
+      label: `${pattern.name} ${totalBalls}発`,
       rush,
     });
-    if (state.mode === "NORMAL") state.spins = 0;
+    if (!inRush) state.spins = 0;
     renderHistory();
 
+    // ひび割れ → 大当りオーバーレイの順で演出
+    FX.crack();
     const overlay = $("jackpotOverlay"), jt = $("jackpotText"), rt = $("roundText");
-    jt.textContent = pattern.premium ? "★PREMIUM 大当り★" : "大当り!!";
-    jt.className = "jackpot-text" + (pattern.premium ? " premium" : "");
-    rt.textContent = "";
-    overlay.classList.remove("hidden");
-    FX.flash(true); FX.shake(); FX.lampMode("gold");
+    setTimeout(() => {
+      jt.textContent = pattern.premium ? "★PREMIUM 大当り★" : "大当り!!";
+      jt.className = "jackpot-text" + (pattern.premium ? " premium" : "");
+      rt.textContent = inRush ? `${totalBalls}発 GET!!` : "";
+      overlay.classList.remove("hidden");
+      FX.flash(true); FX.lampMode("gold");
 
-    // ラウンド消化(テンポ良く出玉加算)
-    let r = 0;
-    const roundTimer = setInterval(() => {
-      r++;
-      rt.textContent = `ROUND ${r} / ${rounds}  +${CONFIG.payout.ballsPerRound}玉`;
-      state.balls += CONFIG.payout.ballsPerRound;
-      renderStats();
-      FX.flash(true);
-      if (r >= rounds) {
-        clearInterval(roundTimer);
-        setTimeout(() => finishJackpot(rush), CONFIG.timing.jackpotBanner);
-        rt.textContent = rush ? "⚡ NEON RUSH 突入!! ⚡" : "通常時へ…";
-      }
-    }, CONFIG.timing.roundTick);
+      // 出玉回収(回収終了後にfinishJackpotでST再セット→再抽選開始)
+      let r = 0;
+      const roundTimer = setInterval(() => {
+        r++;
+        rt.textContent = `ROUND ${r} / ${rounds}  +${perRound}玉`;
+        state.balls += perRound;
+        renderStats();
+        FX.flash(true);
+        if (r >= rounds) {
+          clearInterval(roundTimer);
+          rt.textContent = inRush
+            ? `合計 ${totalBalls}発!! ⚡RUSH継続⚡`
+            : (rush ? "⚡ NEON RUSH 突入!! ⚡" : "通常時へ…");
+          setTimeout(() => finishJackpot(rush), CONFIG.timing.jackpotBanner);
+        }
+      }, CONFIG.timing.roundTick);
+    }, 800);
   }
 
   function finishJackpot(rush) {
@@ -538,8 +582,16 @@ const Game = (() => {
     }, CONFIG.timing.rushEndBanner);
   }
 
-  /* --- 玉の発射 --- */
+   /* --- 玉の発射 --- */
   function launchBall() {
+    if (state.mode === "RUSH") {
+      // 右打ち: 持ち玉は減らず、1発が必ず1保留になる
+      // (大当り消化中は保留に変わらず、出玉はラウンドで持ち玉へ加算)
+      state.launches++;
+      if (state.phase === "IDLE" || state.phase === "SPIN") addHold();
+      renderStats();
+      return;
+    }
     if (state.balls <= 0) return;
     state.balls--;
     state.launches++;
@@ -551,7 +603,7 @@ const Game = (() => {
   }
 
   /* --- 描画 --- */
-  function renderStats() {
+    function renderStats() {
     $("ballCount").textContent = state.balls;
     $("spinCount").textContent = state.totalSpins;
     $("hitCount").textContent = state.hits;
@@ -559,6 +611,10 @@ const Game = (() => {
     const mt = $("modeText");
     mt.textContent = state.mode === "RUSH" ? "RUSH" : "通常";
     mt.classList.toggle("rush", state.mode === "RUSH");
+    // RUSH中は右打ちボタンに変更
+    $("fireBtn").textContent = state.mode === "RUSH"
+      ? "👉 右打ち!!(長押し / Space)"
+      : "🚀 玉を打つ(長押し / Space)";
     const st = $("stInfo");
     if (state.mode === "RUSH") {
       st.textContent = `ST残り ${state.stRemaining} 回転`;
@@ -568,10 +624,10 @@ const Game = (() => {
   function renderMode() {
     $("modeBanner").classList.toggle("hidden", state.mode !== "RUSH");
   }
-  function renderHolds() {
-    for (let i = 0; i < 4; i++) {
+    function renderHolds() {
+    for (let i = 0; i < 5; i++) {
       const el = $("hold" + i), h = state.holds[i];
-      el.className = "hold-orb " + (h ? "c-" + h.color : "empty");
+      if (el) el.className = "hold-orb " + (h ? "c-" + h.color : "empty");
     }
   }
   function renderHistory() {
