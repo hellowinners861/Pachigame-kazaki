@@ -236,6 +236,7 @@ const Reels = (() => {
     if (value !== undefined) {
       setDigit(i, value);
       els[i].classList.add("stopped");
+     SFX.reelStop();
     }
   }
   function spinAll() { [0, 1, 2].forEach(spin); }
@@ -331,11 +332,13 @@ const Director = (() => {
   }
 
   function showYokoku(text, cls) {
+    cls === "hot" ? SFX.yokokuHot() : SFX.yokoku();
     yokokuEl.textContent = text;
     yokokuEl.className = "yokoku " + (cls || "");
     handles.push(setTimeout(() => yokokuEl.classList.add("hidden"), 1600));
   }
   function showCutin(text, gold) {
+    gold ? SFX.cutinGold() : SFX.cutin();
     cutinEl.textContent = text;
     cutinEl.className = "cutin" + (gold ? " gold" : "");
     FX.flash(gold); FX.shake();
@@ -344,6 +347,7 @@ const Director = (() => {
 
   /* --- 暗転演出(激アツの「間」) --- */
   function blackout() {
+    SFX.blackout();
     const f = document.getElementById("flash");
     f.classList.remove("go", "gold-flash");
     f.classList.add("dark");
@@ -358,6 +362,7 @@ const Director = (() => {
       if (type === "ikigeki") showCutin("❄ 一撃・氷華ボタン!!! ❄", true);
       else showYokoku("PUSH!!", "hot");
     });
+    SFX.button();
     at(tResolve, () => { FX.flash(type === "ikigeki"); FX.shake(); });
   }
 
@@ -378,7 +383,7 @@ const Director = (() => {
 
     // --- 予告 ---
     (p.yokoku || []).forEach(y => at(y.at, () => showYokoku(y.text, y.cls)));
-    if (holdColor === "red")     at(500, () => { showYokoku("赤保留!! 嫌な予感が…", "hot"); FX.alertRed(); });
+    if (holdColor === "red")     at(500, () => { showYokoku("赤保留!! 嫌な予感が…", "hot"); FX.alertRed(); SFX.alertRed(); });
     if (holdColor === "gold")    at(500, () => showYokoku("金保留!! 豪華な宝箱レベル…!?", "hot"));
     if (holdColor === "rainbow") at(500, () => showYokoku("虹保留!! 帝君のご加護を…", "rainbow"));
 
@@ -387,7 +392,8 @@ const Director = (() => {
     const base = (renCount - 1) * 2400;  // 擬似連が消費する時間
     for (let k = 1; k < renCount; k++) {
       const tStop = k * 2400 - 1000;
-      at(tStop, () => {
+      at(tStop, () => { 
+        SFX.pseudo();
         Reels.stop(0, pickInt(9) + 1);
         Reels.stop(2, pickInt(9) + 1);
         Reels.stop(1, "連");
@@ -441,6 +447,7 @@ const Director = (() => {
     at(p.dur, () => {
       reachEl.classList.add("hidden");
       if (judge.win) { Reels.markWin(); FX.flash(true); FX.lampMode("gold"); }
+      if (!judge.win) SFX.lose();
       else { FX.setBg(Game.isRush() ? "bg-rush" : ""); FX.lampMode(Game.isRush() ? "excited" : "calm"); }
       onDone(judge.win);
     });
@@ -546,6 +553,7 @@ const Game = (() => {
 
     // ひび割れ → 大当りオーバーレイの順で演出
     FX.crack();
+    pattern.premium ? SFX.premium() : SFX.jackpot();
     const overlay = $("jackpotOverlay"), jt = $("jackpotText"), rt = $("roundText");
     setTimeout(() => {
       jt.textContent = pattern.premium ? "★麒麟、降臨★" : "大当り!!";
@@ -564,6 +572,7 @@ const Game = (() => {
         state.balls += perRound;
         renderStats();
         FX.flash(true);
+        SFX.payout();
         if (r >= rounds) {
           clearInterval(roundTimer);
           rt.textContent = inRush
@@ -580,7 +589,7 @@ const Game = (() => {
     if (rush) {
       state.mode = "RUSH";
       state.stRemaining = CONFIG.lottery.stSpins;
-      FX.setBg("bg-rush"); FX.lampMode("excited");
+      FX.setBg("bg-rush"); SFX.rushIn(); FX.lampMode("excited");
     } else {
       state.mode = "NORMAL";
       FX.setBg(""); FX.lampMode("calm");
@@ -596,7 +605,7 @@ const Game = (() => {
         jt.textContent = "RUSH終了…";
     jt.className = "jackpot-text";
     rt.textContent = "お仕事、終わりました…おやすみなさい";
-    overlay.classList.remove("hidden");
+    overlay.classList.remove("hidden"); SFX.rushEnd();
     setTimeout(() => {
       overlay.classList.add("hidden");
       state.mode = "NORMAL";
@@ -701,7 +710,7 @@ const Game = (() => {
     }
   }
 
-  const start = (e) => { e.preventDefault(); firing = true; updateLoop(); };
+  const start = (e) => { e.preventDefault(); SFX.unlock(); firing = true; updateLoop(); };
   const stop = () => { firing = false; };
 
   fireBtn.addEventListener("mousedown", start);
