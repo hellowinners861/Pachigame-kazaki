@@ -376,3 +376,5 @@ body {
   line-height: 1.3;
   z-index: 5;
 }
+/* 図柄の光彩を数字ごとの色に連動させる */
+.reel { text-shadow: 0 0 12px currentColor; }
