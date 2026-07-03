@@ -53,7 +53,7 @@ const CONFIG = {
    例: lcdBg: "images/bg_normal.png"
    空文字のときはCSSのグラデーション/絵文字を使用。       */
 const ASSETS = {
-    lcdBg:      "images/IMG_4147.jpeg",   // 液晶背景
+    lcdBg:      "IMG_4147.jpeg",   // 液晶背景
   lcdBgRush:  "",   // RUSH中背景
   character:  "",   // キャラクター画像(空なら🐱)
   cutinImg:   "",   // カットイン画像(拡張用)
