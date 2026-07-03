@@ -661,9 +661,17 @@ const Game = (() => {
     ).join("") || '<li class="history-empty">まだ大当りはありません</li>';
   }
 
-  /* --- 画像差し替え適用 --- */
+    /* --- 画像差し替え適用 --- */
   function applyAssets() {
-    if (ASSETS.lcdBg) $("lcdBg").style.backgroundImage = `url(${ASSETS.lcdBg})`;
+    if (ASSETS.lcdBg) {
+      $("lcdBg").style.backgroundImage = `url(${ASSETS.lcdBg})`;
+      // 画像の縦横比に液晶エリアを自動で合わせる(見切れ防止)
+      const img = new Image();
+      img.onload = () => {
+        $("lcd").style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
+      };
+      img.src = ASSETS.lcdBg;
+    }
     if (ASSETS.character) {
       const c = $("character");
       c.textContent = "";
