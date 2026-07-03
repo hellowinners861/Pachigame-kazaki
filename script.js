@@ -204,17 +204,37 @@ const Reels = (() => {
   const els = [0, 1, 2].map(i => document.getElementById("reel" + i));
   const timers = [null, null, null];
 
+  /* 図柄は1〜9。数字ごとの色(好みで変更OK) */
+  const DIGIT_COLORS = {
+    1: "#ff5c5c",  // 赤
+    2: "#ff9d4a",  // 橙
+    3: "#b8ff4a",  // 黄緑
+    4: "#4aff9d",  // 緑
+    5: "#4ae0ff",  // 水色
+    6: "#4a86ff",  // 青
+    7: "#ffd76a",  // 金(メイン図柄)
+    8: "#b04cff",  // 紫
+    9: "#ff6ad5",  // ピンク
+  };
+  const randDigit = () => pickInt(9) + 1;   // 1〜9
+
+  /* 数字と色をセットで反映("連"など数字以外は金色) */
+  function setDigit(i, v) {
+    els[i].textContent = v;
+    els[i].style.color = DIGIT_COLORS[v] || "var(--gold)";
+  }
+
   function spin(i) {
     stop(i);
     els[i].classList.add("spinning");
     els[i].classList.remove("stopped", "win");
-    timers[i] = setInterval(() => { els[i].textContent = pickInt(10); }, 60);
+    timers[i] = setInterval(() => setDigit(i, randDigit()), 60);
   }
   function stop(i, value) {
     if (timers[i]) { clearInterval(timers[i]); timers[i] = null; }
     els[i].classList.remove("spinning");
     if (value !== undefined) {
-      els[i].textContent = value;
+      setDigit(i, value);
       els[i].classList.add("stopped");
     }
   }
@@ -227,17 +247,20 @@ const Reels = (() => {
     if (win) {
       if (premium) return [7, 7, 7];
       // 奇数=RUSH当り、偶数=通常当りの図柄法則
-      const odds = [1, 3, 5, 7, 9], evens = [0, 2, 4, 6, 8];
-      const n = rushHit ? odds[pickInt(5)] : evens[pickInt(5)];
+      const odds = [1, 3, 5, 7, 9], evens = [2, 4, 6, 8];
+      const n = rushHit ? odds[pickInt(5)] : evens[pickInt(4)];
       return [n, n, n];
     }
     if (reach) {
-      const n = pickInt(10);
-      return [n, n, (n + (chance(0.5) ? 1 : 9)) % 10]; // 中図柄だけ±1ズレ
+      const n = randDigit();
+      let m = n + (chance(0.5) ? 1 : -1);   // ±1ズレ(1〜9の範囲で折り返し)
+      if (m < 1) m = 9;
+      if (m > 9) m = 1;
+      return [n, n, m];
     }
-    const a = pickInt(10);
-    let b = pickInt(10); if (b === a) b = (b + 1) % 10;
-    return [a, b, pickInt(10)];
+    const a = randDigit();
+    let b = randDigit(); if (b === a) b = a % 9 + 1;
+    return [a, b, randDigit()];
   }
 
   return { spin, stop, spinAll, stopAll, markWin, decideDigits };
@@ -365,8 +388,8 @@ const Director = (() => {
     for (let k = 1; k < renCount; k++) {
       const tStop = k * 2400 - 1000;
       at(tStop, () => {
-        Reels.stop(0, pickInt(10));
-        Reels.stop(2, pickInt(10));
+        Reels.stop(0, pickInt(9) + 1);
+        Reels.stop(2, pickInt(9) + 1);
         Reels.stop(1, "連");
         FX.flash();
         showYokoku("「契約」は、まだ…!!", "hot");
