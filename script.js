@@ -447,8 +447,7 @@ const Director = (() => {
     at(p.dur, () => {
       reachEl.classList.add("hidden");
       if (judge.win) { Reels.markWin(); FX.flash(true); FX.lampMode("gold"); }
-      if (!judge.win) SFX.lose();
-      else { FX.setBg(Game.isRush() ? "bg-rush" : ""); FX.lampMode(Game.isRush() ? "excited" : "calm"); }
+      else { SFX.lose(); FX.setBg(Game.isRush() ? "bg-rush" : ""); FX.lampMode(Game.isRush() ? "excited" : "calm"); }
       onDone(judge.win);
     });
   }
@@ -484,8 +483,9 @@ const Game = (() => {
     return { win, rushHit, color };
   }
 
-  function addHold() {
+    function addHold() {
     if (state.holds.length >= 5) return false;   // 保留最大5
+    if (state.mode !== "RUSH") SFX.hold();
     state.holds.push(judgeNewHold());
     renderHolds();
     return true;
