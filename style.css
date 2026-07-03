@@ -6,16 +6,16 @@
    ============================================================ */
 
 :root {
-  --bg: #0a0510;
-  --chassis: #16101e;
-  --chassis-edge: #2a1b38;
-  --neon-pink: #ff3fa4;
-  --neon-pink-soft: #ff8fd0;
-  --neon-purple: #b04cff;
-  --gold: #ffd76a;
-  --hot-red: #ff4040;
-  --text: #f5eefa;
-  --dim: #9b8aad;
+  --bg: #050a18;
+  --chassis: #0e1830;
+  --chassis-edge: #1b2e55;
+  --neon-pink: #4ab8ff;        /* 変数名は据え置き、色を氷ブルーに */
+  --neon-pink-soft: #a8e0ff;
+  --neon-purple: #7a5cff;      /* 紫水晶 */
+  --gold: #ffd76a;             /* 金縁はそのまま */
+  --hot-red: #ff4040;          /* 激アツ赤は据え置き */
+  --text: #eef4ff;
+  --dim: #8a9ab8;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -294,10 +294,10 @@ body {
   padding: 18px;
   font-size: 17px; font-weight: 800;
   color: #fff;
-  background: linear-gradient(180deg, var(--neon-pink), #b0186e);
+    background: linear-gradient(180deg, #4ab8ff, #1a5fae);
   border: none; border-radius: 14px;
   cursor: pointer;
-  box-shadow: 0 4px 0 #6e0f45, 0 0 24px rgba(255,63,164,.4);
+  box-shadow: 0 4px 0 #0d3a6e, 0 0 24px rgba(74,184,255,.4);
 }
 .fire-btn:active, .fire-btn.firing {
   transform: translateY(3px);
@@ -333,7 +333,7 @@ body {
 /* ===== 大当りひび割れ演出 =====
    --crack-tint を背景画像の雰囲気に合わせて変更可
    (例: 金系背景なら rgba(255,215,106,.95)) */
-:root { --crack-tint: rgba(255, 255, 255, .95); }
+:root { --crack-tint: rgba(180, 230, 255, .95); }
 
 .crack-layer {
   position: absolute; inset: 0;
