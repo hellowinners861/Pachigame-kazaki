@@ -330,3 +330,35 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01s !important; }
 }
+/* ===== 大当りひび割れ演出 =====
+   --crack-tint を背景画像の雰囲気に合わせて変更可
+   (例: 金系背景なら rgba(255,215,106,.95)) */
+:root { --crack-tint: rgba(255, 255, 255, .95); }
+
+.crack-layer {
+  position: absolute; inset: 0;
+  z-index: 26;               /* 大当りオーバーレイ(20)より上に被せる */
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background-size: cover; background-position: center;
+  background-image:
+    radial-gradient(circle at 50% 45%, var(--crack-tint) 0 2%, transparent 6%),
+    linear-gradient(72deg,  transparent 49.5%, var(--crack-tint) 49.9%, var(--crack-tint) 50.1%, transparent 50.5%),
+    linear-gradient(-55deg, transparent 49.4%, var(--crack-tint) 49.9%, var(--crack-tint) 50.1%, transparent 50.6%),
+    linear-gradient(15deg,  transparent 49.6%, var(--crack-tint) 49.95%, var(--crack-tint) 50.05%, transparent 50.4%),
+    linear-gradient(-20deg, transparent 49.6%, var(--crack-tint) 49.95%, var(--crack-tint) 50.05%, transparent 50.4%),
+    linear-gradient(100deg, transparent 49.7%, var(--crack-tint) 49.95%, var(--crack-tint) 50.05%, transparent 50.3%),
+    linear-gradient(-88deg, transparent 49.7%, var(--crack-tint) 49.95%, var(--crack-tint) 50.05%, transparent 50.3%);
+}
+.crack-layer.go { animation: crackIn .5s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes crackIn {
+  0%   { transform: scale(.1); opacity: 0; }
+  40%  { opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== 赤保留警告(画面が赤く脈動) ===== */
+.lcd.alert-red { animation: alertRed 1s ease-in-out 3; }
+@keyframes alertRed {
+  50% { box-shadow: inset 0 0 60px 20px rgba(255, 40, 40, .55); }
+}
