@@ -70,20 +70,36 @@ function weightedPick(list) {
 /* --- 保留色(先読み)テーブル: 当落で振り分けを変える --- */
 const HOLD_COLOR_TABLE = {
   lose: [
-    { w: 90,  color: "white"   },
-    { w: 7,   color: "blue"    },
-    { w: 2.5, color: "green"   },
-    { w: 0.5, color: "red"     },
+    { w: 89,   color: "white" },
+    { w: 7,    color: "blue"  },
+    { w: 2.6,  color: "green" },
+    { w: 0.35, color: "red"   },
+    { w: 0.05, color: "gold"  },  // 金保留でも極稀に外れる(信頼度約85%)
     // ハズレで虹は出ない(虹=大当り確定)
   ],
   win: [
-    { w: 25, color: "white"   },
-    { w: 20, color: "blue"    },
-    { w: 22, color: "green"   },
-    { w: 28, color: "red"     },
+    { w: 20, color: "white"   },
+    { w: 16, color: "blue"    },
+    { w: 20, color: "green"   },
+    { w: 26, color: "red"     },
+    { w: 13, color: "gold"    },
     { w: 5,  color: "rainbow" },
   ],
 };
+
+/* --- 金保留・暗転用CSSをJSから注入(style.css編集不要) --- */
+(() => {
+  const s = document.createElement("style");
+  s.textContent = `
+    .hold-orb.c-gold { --orb:#ffd76a; box-shadow:0 0 16px #ffd76a;
+      animation: orbPulse .5s infinite alternate; }
+    .flash.dark { background:#000; }
+    @keyframes darkHold { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+    .flash.dark.go { animation: darkHold 1.3s ease-out; }
+  `;
+  document.head.appendChild(s);
+})();
+
 
 /* --- 変動パターン定義 ---
    演出を追加したいときはここにオブジェクトを足すだけ。
@@ -100,60 +116,80 @@ const HOLD_COLOR_TABLE = {
 const PATTERNS = {
   /* ===== 通常時・ハズレ ===== */
   normalLose: [
-    { w: 52, name: "即ハズレ",     reach: false, sp: 0, dur: 3600 },
-    { w: 22, name: "弱予告ハズレ", reach: false, sp: 0, dur: 4800,
+    { w: 44, name: "即ハズレ",     reach: false, sp: 0, dur: 3600 },
+    { w: 18, name: "弱予告ハズレ", reach: false, sp: 0, dur: 4800,
       yokoku: [{ at: 900, text: "ん…?", cls: "" }] },
-    { w: 14, name: "Nリーチハズレ", reach: true, sp: 0, dur: 9000 },
-    { w: 8,  name: "SP弱ハズレ",   reach: true, sp: 1, dur: 14000,
+    { w: 12, name: "Nリーチハズレ", reach: true, sp: 0, dur: 9000 },
+    { w: 6,  name: "擬似連×2ハズレ", reach: true, sp: 1, dur: 16000, pseudo: 2,
+      cutin: { at: 11000, text: "ネコパンチ!", gold: false } },
+    { w: 8,  name: "SP弱ハズレ",   reach: true, sp: 1, dur: 14500, button: "normal",
       yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }],
       cutin: { at: 9500, text: "ネコパンチ!", gold: false } },
-    { w: 3.5, name: "SP強ハズレ",  reach: true, sp: 2, dur: 18500,
+    { w: 4,  name: "SP強ハズレ",   reach: true, sp: 2, dur: 19000, button: "normal",
       yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" }],
       cutin: { at: 12500, text: "覚醒カットイン", gold: false } },
-    { w: 0.5, name: "激アツハズレ", reach: true, sp: 2, dur: 20000,
-      yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" },
-               { at: 5000, text: "激アツ!!", cls: "hot" }],
-      cutin: { at: 14000, text: "金カットイン!!", gold: true } },
+    { w: 1.3, name: "擬似連×3ハズレ", reach: true, sp: 2, dur: 21500,
+      pseudo: 3, button: "normal",
+      cutin: { at: 14500, text: "覚醒カットイン", gold: false } },
+    { w: 0.5, name: "王道激アツハズレ", reach: true, sp: 2, dur: 21000,
+      button: "normal", blackout: 10500,
+      yokoku: [{ at: 900,   text: "🐱🐱🐱 ネコ群!!! 🐱🐱🐱", cls: "hot" },
+               { at: 12000, text: "激アツ!!", cls: "hot" }],
+      cutin: { at: 14500, text: "金カットイン!!", gold: true } },
   ],
 
   /* ===== 通常時・当り ===== */
   normalWin: [
-    { w: 6,  name: "Nリーチ当り", reach: true, sp: 0, dur: 9500 },
-    { w: 20, name: "SP弱当り",   reach: true, sp: 1, dur: 14500,
+    { w: 4,  name: "Nリーチ当り", reach: true, sp: 0, dur: 9500 },
+    { w: 12, name: "SP弱当り",   reach: true, sp: 1, dur: 15000, button: "normal",
       yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }],
       cutin: { at: 9500, text: "ネコパンチ!", gold: false } },
-    { w: 38, name: "SP強当り",   reach: true, sp: 2, dur: 19000,
+    { w: 26, name: "SP強当り",   reach: true, sp: 2, dur: 19500, button: "normal",
       yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" }],
       cutin: { at: 12500, text: "覚醒カットイン", gold: true } },
-    { w: 22, name: "激アツ当り", reach: true, sp: 2, dur: 20500,
-      yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" },
-               { at: 5000, text: "激アツ!!", cls: "hot" }],
-      cutin: { at: 14000, text: "金カットイン!!", gold: true } },
-    { w: 8,  name: "復活当り",   reach: true, sp: 1, dur: 15000, revival: true,
+    { w: 16, name: "擬似連×2→SP強当り", reach: true, sp: 2, dur: 20500,
+      pseudo: 2, button: "normal",
+      cutin: { at: 15000, text: "金カットイン!!", gold: true } },
+    { w: 20, name: "王道激アツ当り", reach: true, sp: 2, dur: 21500,
+      button: "ikigeki", blackout: 10500,
+      yokoku: [{ at: 900,   text: "🐱🐱🐱 ネコ群!!! 🐱🐱🐱", cls: "hot" },
+               { at: 12000, text: "激アツ!!", cls: "hot" }],
+      cutin: { at: 14500, text: "金カットイン!!", gold: true } },
+    { w: 10, name: "擬似連×3→一撃当り", reach: true, sp: 2, dur: 23000,
+      pseudo: 3, button: "ikigeki", blackout: 13500,
+      cutin: { at: 16500, text: "金カットイン!!", gold: true } },
+    { w: 7,  name: "復活当り", reach: true, sp: 1, dur: 15000, revival: true,
       yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }] },
-    { w: 6,  name: "プレミア全回転", reach: true, sp: 2, dur: 12000, premium: true,
+    { w: 5,  name: "プレミア全回転", reach: true, sp: 2, dur: 12000, premium: true,
       yokoku: [{ at: 1200, text: "★ PREMIUM ★", cls: "rainbow" }] },
   ],
 
-  /* ===== RUSH中(テンポ重視の短時間パターン) ===== */
+  /* ===== RUSH中(テンポ重視) ===== */
   rushLose: [
-    { w: 70, name: "RUSH即ハズレ", reach: false, sp: 0, dur: 2200 },
+    { w: 66, name: "RUSH即ハズレ", reach: false, sp: 0, dur: 2200 },
     { w: 22, name: "RUSH煽り",     reach: false, sp: 0, dur: 3200,
       yokoku: [{ at: 600, text: "!?", cls: "" }] },
-    { w: 8,  name: "RUSHリーチハズレ", reach: true, sp: 1, dur: 7000,
+    { w: 9,  name: "RUSHリーチハズレ", reach: true, sp: 1, dur: 7000,
       cutin: { at: 4200, text: "追撃…", gold: false } },
+    { w: 3,  name: "RUSH擬似連ハズレ", reach: true, sp: 1, dur: 9500,
+      pseudo: 2, button: "normal" },
   ],
   rushWin: [
-    { w: 45, name: "RUSH速攻当り", reach: true, sp: 1, dur: 6500,
+    { w: 40, name: "RUSH速攻当り", reach: true, sp: 1, dur: 6500,
       cutin: { at: 3800, text: "追撃HIT!", gold: true } },
-    { w: 40, name: "RUSH強当り",  reach: true, sp: 2, dur: 9000,
+    { w: 30, name: "RUSH強当り",  reach: true, sp: 2, dur: 9000, button: "normal",
       yokoku: [{ at: 700, text: "激アツ!!", cls: "hot" }],
       cutin: { at: 5500, text: "金カットイン!!", gold: true } },
+    { w: 12, name: "RUSH一撃必殺", reach: true, sp: 2, dur: 9500, button: "ikigeki",
+      yokoku: [{ at: 700, text: "激アツ!!", cls: "hot" }] },
     { w: 10, name: "RUSH復活",    reach: true, sp: 1, dur: 8000, revival: true },
     { w: 5,  name: "RUSHプレミア", reach: true, sp: 2, dur: 7000, premium: true,
       yokoku: [{ at: 900, text: "★ PREMIUM ★", cls: "rainbow" }] },
+    { w: 3,  name: "RUSH擬似連当り", reach: true, sp: 2, dur: 11000, pseudo: 2,
+      cutin: { at: 8000, text: "金カットイン!!", gold: true } },
   ],
 };
+
 
 /* ============ 5. Reels(図柄リール制御) ============ */
 const Reels = (() => {
@@ -259,33 +295,68 @@ const Director = (() => {
     handles.push(setTimeout(() => cutinEl.classList.add("hidden"), 1800));
   }
 
+  /* --- 暗転演出(激アツの「間」) --- */
+  function blackout() {
+    const f = document.getElementById("flash");
+    f.classList.remove("go", "gold-flash");
+    f.classList.add("dark");
+    void f.offsetWidth;
+    f.classList.add("go");
+    handles.push(setTimeout(() => f.classList.remove("dark", "go"), 1400));
+  }
+
+  /* --- 当落ボタン演出: normal=PUSH / ikigeki=一撃必殺(大当り濃厚) --- */
+  function showButton(type, tPrompt, tResolve) {
+    at(tPrompt, () => {
+      if (type === "ikigeki") showCutin("⚔ 一撃必殺ボタン!!!", true);
+      else showYokoku("PUSH!!", "hot");
+    });
+    at(tResolve, () => { FX.flash(type === "ikigeki"); FX.shake(); });
+  }
+
   /**
    * 変動を再生する
-   * @param {object} p        パターン定義
-   * @param {object} judge    {win, rushHit}
-   * @param {string} holdColor 消化した保留の色
-   * @param {function} onDone 変動終了コールバック(win を渡す)
+   * 追加フィールド:
+   *   pseudo:n    … 擬似連(2なら×2、3なら×3まで発展)
+   *   button      … 当落ボタン "normal" | "ikigeki"
+   *   blackout:at … 暗転(激アツ前の「間」)
    */
   function play(p, judge, holdColor, onDone) {
     clearTimeline();
     const digits = Reels.decideDigits({ ...judge, reach: p.reach, premium: p.premium });
     Reels.spinAll();
 
-    // 先読み保留が赤以上ならランプ興奮
-    if (holdColor === "red" || holdColor === "rainbow") FX.lampMode("excited");
+    if (holdColor === "red" || holdColor === "gold" || holdColor === "rainbow")
+      FX.lampMode("excited");
 
     // --- 予告 ---
     (p.yokoku || []).forEach(y => at(y.at, () => showYokoku(y.text, y.cls)));
+    if (holdColor === "gold")    at(500, () => showYokoku("金保留!!", "hot"));
     if (holdColor === "rainbow") at(500, () => showYokoku("虹保留!!", "rainbow"));
 
-    // --- リール停止タイミングを dur から逆算 ---
-    const tLeft  = Math.min(1600, p.dur * 0.3);
-    const tRight = Math.min(2800, p.dur * 0.45);
+    // --- 擬似連: 一旦停止→再始動を繰り返す ---
+    const renCount = p.pseudo || 1;      // 総連数(1=擬似連なし)
+    const base = (renCount - 1) * 2400;  // 擬似連が消費する時間
+    for (let k = 1; k < renCount; k++) {
+      const tStop = k * 2400 - 1000;
+      at(tStop, () => {
+        Reels.stop(0, pickInt(10));
+        Reels.stop(2, pickInt(10));
+        Reels.stop(1, "連");
+        FX.flash();
+        showYokoku(`擬似連 ×${k + 1}`, k + 1 >= 3 ? "hot" : "");
+      });
+      at(tStop + 1000, () => Reels.spinAll());
+    }
+
+    // --- リール停止タイミング(擬似連ぶん後ろへずらす) ---
+    const mainDur = p.dur - base;
+    const tLeft   = base + Math.min(1600, mainDur * 0.3);
+    const tRight  = base + Math.min(2800, mainDur * 0.45);
     const tCenter = p.dur - 400;
 
-    at(tLeft,  () => Reels.stop(0, digits[0]));
+    at(tLeft, () => Reels.stop(0, digits[0]));
     at(tRight, () => {
-      // リーチ時: 右リールは左と同じ図柄で停止(テンパイ)
       Reels.stop(2, p.reach ? digits[0] : digits[2]);
       if (p.reach) {
         reachEl.classList.remove("hidden");
@@ -298,26 +369,23 @@ const Director = (() => {
     if (p.sp >= 1) at(tRight + 1500, () => { FX.setBg("bg-sp1"); FX.flash(); });
     if (p.sp >= 2) at(tRight + 4500, () => { FX.setBg("bg-sp2"); FX.flash(); FX.shake(); });
 
-    // --- カットイン(チャンスアップ) ---
+    // --- 暗転・カットイン・当落ボタン ---
+    if (p.blackout) at(p.blackout, blackout);
     if (p.cutin) at(p.cutin.at, () => showCutin(p.cutin.text, p.cutin.gold));
+    if (p.button) showButton(p.button, tCenter - 2600, tCenter - 800);
 
     // --- 中リール停止 → 結果 ---
     if (p.revival && judge.win) {
-      // 一度ハズレ目で止めてから復活
-      at(tCenter - 2200, () => {
-        const miss = (digits[0] + 1) % 10;
-        Reels.stop(1, miss);
-      });
+      at(tCenter - 2200, () => Reels.stop(1, (digits[0] + 1) % 10));
       at(tCenter - 600, () => {
         showYokoku("復活!!", "hot");
         FX.flash(true); FX.shake();
-        Reels.stop(1, digits[0]);
-        Reels.stop(0, digits[0]); Reels.stop(2, digits[0]);
+        Reels.stop(0, digits[0]); Reels.stop(1, digits[0]); Reels.stop(2, digits[0]);
       });
     } else {
       at(tCenter, () => {
         Reels.stop(1, judge.win ? digits[0] : digits[p.reach ? 2 : 1]);
-        if (!judge.win && p.reach) FX.shake();  // 惜しい揺れ
+        if (!judge.win && p.reach) FX.shake();
       });
     }
 
@@ -329,6 +397,7 @@ const Director = (() => {
       onDone(judge.win);
     });
   }
+
 
   return { play, clearTimeline };
 })();
