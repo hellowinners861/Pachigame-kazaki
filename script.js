@@ -613,9 +613,9 @@ const Game = (() => {
     mt.textContent = state.mode === "RUSH" ? "RUSH" : "通常";
     mt.classList.toggle("rush", state.mode === "RUSH");
     // RUSH中は右打ちボタンに変更
-    $("fireBtn").textContent = state.mode === "RUSH"
-      ? "👉 右打ち!!(長押し / Space)"
-      : "🚀 玉を打つ(長押し / Space)";
+       $("fireBtn").textContent = state.mode === "RUSH"
+      ? "👉 右打ち!!"
+      : "🚀 打!!";
     const st = $("stInfo");
     if (state.mode === "RUSH") {
       st.textContent = `ST残り ${state.stRemaining} 回転`;
