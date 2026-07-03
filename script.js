@@ -127,78 +127,77 @@ const PATTERNS = {
   normalLose: [
     { w: 44, name: "即ハズレ",     reach: false, sp: 0, dur: 3600 },
     { w: 18, name: "弱予告ハズレ", reach: false, sp: 0, dur: 4800,
-      yokoku: [{ at: 900, text: "ん…?", cls: "" }] },
+      yokoku: [{ at: 900, text: "ん…気のせいですね", cls: "" }] },
     { w: 12, name: "Nリーチハズレ", reach: true, sp: 0, dur: 9000 },
     { w: 6,  name: "擬似連×2ハズレ", reach: true, sp: 1, dur: 16000, pseudo: 2,
-      cutin: { at: 11000, text: "ネコパンチ!", gold: false } },
+      cutin: { at: 11000, text: "霜寒化生!", gold: false } },
     { w: 8,  name: "SP弱ハズレ",   reach: true, sp: 1, dur: 14500, button: "normal",
-      yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }],
-      cutin: { at: 9500, text: "ネコパンチ!", gold: false } },
+      yokoku: [{ at: 1000, text: "お仕事の時間…ですか?", cls: "" }],
+      cutin: { at: 9500, text: "霜寒化生!", gold: false } },
     { w: 4,  name: "SP強ハズレ",   reach: true, sp: 2, dur: 19000, button: "normal",
-      yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" }],
-      cutin: { at: 12500, text: "覚醒カットイン", gold: false } },
+      yokoku: [{ at: 900, text: "麒麟の血が、騒ぎます…!!", cls: "hot" }],
+      cutin: { at: 12500, text: "覚醒…この一矢に", gold: false } },
     { w: 1.3, name: "擬似連×3ハズレ", reach: true, sp: 2, dur: 21500,
       pseudo: 3, button: "normal",
-      cutin: { at: 14500, text: "覚醒カットイン", gold: false } },
+      cutin: { at: 14500, text: "覚醒…この一矢に", gold: false } },
     { w: 0.5, name: "王道激アツハズレ", reach: true, sp: 2, dur: 21000,
       button: "normal", blackout: 10500,
-      yokoku: [{ at: 900,   text: "🐱🐱🐱 ネコ群!!! 🐱🐱🐱", cls: "hot" },
+      yokoku: [{ at: 900,   text: "❄❄❄ 清心、満開!!! ❄❄❄", cls: "hot" },
                { at: 12000, text: "激アツ!!", cls: "hot" }],
-      cutin: { at: 14500, text: "金カットイン!!", gold: true } },
+      cutin: { at: 14500, text: "✦金カットイン✦ 全力で、いきます!!", gold: true } },
   ],
 
   /* ===== 通常時・当り ===== */
   normalWin: [
     { w: 4,  name: "Nリーチ当り", reach: true, sp: 0, dur: 9500 },
     { w: 12, name: "SP弱当り",   reach: true, sp: 1, dur: 15000, button: "normal",
-      yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }],
-      cutin: { at: 9500, text: "ネコパンチ!", gold: false } },
+      yokoku: [{ at: 1000, text: "お仕事の時間…ですか?", cls: "" }],
+      cutin: { at: 9500, text: "霜寒化生!", gold: false } },
     { w: 26, name: "SP強当り",   reach: true, sp: 2, dur: 19500, button: "normal",
-      yokoku: [{ at: 900, text: "ネコ群出現!!", cls: "hot" }],
-      cutin: { at: 12500, text: "覚醒カットイン", gold: true } },
+      yokoku: [{ at: 900, text: "麒麟の血が、騒ぎます…!!", cls: "hot" }],
+      cutin: { at: 12500, text: "✦金カットイン✦ 全力で、いきます!!", gold: true } },
     { w: 16, name: "擬似連×2→SP強当り", reach: true, sp: 2, dur: 20500,
       pseudo: 2, button: "normal",
-      cutin: { at: 15000, text: "金カットイン!!", gold: true } },
+      cutin: { at: 15000, text: "✦金カットイン✦ 全力で、いきます!!", gold: true } },
     { w: 20, name: "王道激アツ当り", reach: true, sp: 2, dur: 21500,
       button: "ikigeki", blackout: 10500,
-      yokoku: [{ at: 900,   text: "🐱🐱🐱 ネコ群!!! 🐱🐱🐱", cls: "hot" },
+      yokoku: [{ at: 900,   text: "❄❄❄ 清心、満開!!! ❄❄❄", cls: "hot" },
                { at: 12000, text: "激アツ!!", cls: "hot" }],
-      cutin: { at: 14500, text: "金カットイン!!", gold: true } },
+      cutin: { at: 14500, text: "✦金カットイン✦ 全力で、いきます!!", gold: true } },
     { w: 10, name: "擬似連×3→一撃当り", reach: true, sp: 2, dur: 23000,
       pseudo: 3, button: "ikigeki", blackout: 13500,
-      cutin: { at: 16500, text: "金カットイン!!", gold: true } },
+      cutin: { at: 16500, text: "✦金カットイン✦ 全力で、いきます!!", gold: true } },
     { w: 7,  name: "復活当り", reach: true, sp: 1, dur: 15000, revival: true,
-      yokoku: [{ at: 1000, text: "チャンス!?", cls: "" }] },
+      yokoku: [{ at: 1000, text: "お仕事の時間…ですか?", cls: "" }] },
     { w: 5,  name: "プレミア全回転", reach: true, sp: 2, dur: 12000, premium: true,
-      yokoku: [{ at: 1200, text: "★ PREMIUM ★", cls: "rainbow" }] },
+      yokoku: [{ at: 1200, text: "★麒麟が舞えば、日の光なし★", cls: "rainbow" }] },
   ],
 
   /* ===== RUSH中(テンポ重視) ===== */
   rushLose: [
     { w: 66, name: "RUSH即ハズレ", reach: false, sp: 0, dur: 2200 },
     { w: 22, name: "RUSH煽り",     reach: false, sp: 0, dur: 3200,
-      yokoku: [{ at: 600, text: "!?", cls: "" }] },
+      yokoku: [{ at: 600, text: "残業…?", cls: "" }] },
     { w: 9,  name: "RUSHリーチハズレ", reach: true, sp: 1, dur: 7000,
-      cutin: { at: 4200, text: "追撃…", gold: false } },
+      cutin: { at: 4200, text: "あれ、ミスした…?", gold: false } },
     { w: 3,  name: "RUSH擬似連ハズレ", reach: true, sp: 1, dur: 9500,
       pseudo: 2, button: "normal" },
   ],
   rushWin: [
     { w: 40, name: "RUSH速攻当り", reach: true, sp: 1, dur: 6500,
-      cutin: { at: 3800, text: "追撃HIT!", gold: true } },
+      cutin: { at: 3800, text: "お仕事、完了です!!", gold: true } },
     { w: 30, name: "RUSH強当り",  reach: true, sp: 2, dur: 9000, button: "normal",
       yokoku: [{ at: 700, text: "激アツ!!", cls: "hot" }],
-      cutin: { at: 5500, text: "金カットイン!!", gold: true } },
+      cutin: { at: 5500, text: "帝君のために…!!", gold: true } },
     { w: 12, name: "RUSH一撃必殺", reach: true, sp: 2, dur: 9500, button: "ikigeki",
-      yokoku: [{ at: 700, text: "激アツ!!", cls: "hot" }] },
+      yokoku: [{ at: 700, text: "神の目、解放…!!", cls: "hot" }] },
     { w: 10, name: "RUSH復活",    reach: true, sp: 1, dur: 8000, revival: true },
     { w: 5,  name: "RUSHプレミア", reach: true, sp: 2, dur: 7000, premium: true,
-      yokoku: [{ at: 900, text: "★ PREMIUM ★", cls: "rainbow" }] },
+      yokoku: [{ at: 900, text: "★麒麟が舞えば、日の光なし★", cls: "rainbow" }] },
     { w: 3,  name: "RUSH擬似連当り", reach: true, sp: 2, dur: 11000, pseudo: 2,
-      cutin: { at: 8000, text: "金カットイン!!", gold: true } },
+      cutin: { at: 8000, text: "帝君のために…!!", gold: true } },
   ],
 };
-
 
 /* ============ 5. Reels(図柄リール制御) ============ */
 const Reels = (() => {
@@ -330,10 +329,10 @@ const Director = (() => {
     handles.push(setTimeout(() => f.classList.remove("dark", "go"), 1400));
   }
 
-  /* --- 当落ボタン演出: normal=PUSH / ikigeki=一撃必殺(大当り濃厚) --- */
+    /* --- 当落ボタン演出: normal=PUSH / ikigeki=氷華ボタン(大当り濃厚) --- */
   function showButton(type, tPrompt, tResolve) {
     at(tPrompt, () => {
-      if (type === "ikigeki") showCutin("⚔ 一撃必殺ボタン!!!", true);
+      if (type === "ikigeki") showCutin("❄ 一撃・氷華ボタン!!! ❄", true);
       else showYokoku("PUSH!!", "hot");
     });
     at(tResolve, () => { FX.flash(type === "ikigeki"); FX.shake(); });
@@ -356,9 +355,9 @@ const Director = (() => {
 
     // --- 予告 ---
     (p.yokoku || []).forEach(y => at(y.at, () => showYokoku(y.text, y.cls)));
-        if (holdColor === "red")     at(500, () => { showYokoku("赤保留!!", "hot"); FX.alertRed(); });
-    if (holdColor === "gold")    at(500, () => showYokoku("金保留!!", "hot"));
-    if (holdColor === "rainbow") at(500, () => showYokoku("虹保留!!", "rainbow"));
+    if (holdColor === "red")     at(500, () => { showYokoku("赤保留!! 嫌な予感が…", "hot"); FX.alertRed(); });
+    if (holdColor === "gold")    at(500, () => showYokoku("金保留!! 豪華な宝箱レベル…!?", "hot"));
+    if (holdColor === "rainbow") at(500, () => showYokoku("虹保留!! 帝君のご加護を…", "rainbow"));
 
     // --- 擬似連: 一旦停止→再始動を繰り返す ---
     const renCount = p.pseudo || 1;      // 総連数(1=擬似連なし)
@@ -370,7 +369,7 @@ const Director = (() => {
         Reels.stop(2, pickInt(10));
         Reels.stop(1, "連");
         FX.flash();
-        showYokoku(`擬似連 ×${k + 1}`, k + 1 >= 3 ? "hot" : "");
+        showYokoku("「契約」は、まだ…!!", "hot");
       });
       at(tStop + 1000, () => Reels.spinAll());
     }
@@ -526,9 +525,11 @@ const Game = (() => {
     FX.crack();
     const overlay = $("jackpotOverlay"), jt = $("jackpotText"), rt = $("roundText");
     setTimeout(() => {
-      jt.textContent = pattern.premium ? "★PREMIUM 大当り★" : "大当り!!";
+      jt.textContent = pattern.premium ? "★麒麟、降臨★" : "大当り!!";
       jt.className = "jackpot-text" + (pattern.premium ? " premium" : "");
-      rt.textContent = inRush ? `${totalBalls}発 GET!!` : "";
+       rt.textContent = inRush
+            ? `合計 ${totalBalls}発!! ❄RUSH継続❄`
+            : (rush ? "❄ 氷華RUSH 突入!! ❄" : "通常時へ…");
       overlay.classList.remove("hidden");
       FX.flash(true); FX.lampMode("gold");
 
@@ -569,9 +570,9 @@ const Game = (() => {
   function endRush() {
     state.phase = "BANNER";
     const overlay = $("jackpotOverlay"), jt = $("jackpotText"), rt = $("roundText");
-    jt.textContent = "RUSH終了…";
+        jt.textContent = "RUSH終了…";
     jt.className = "jackpot-text";
-    rt.textContent = "通常時に戻ります";
+    rt.textContent = "お仕事、終わりました…おやすみなさい";
     overlay.classList.remove("hidden");
     setTimeout(() => {
       overlay.classList.add("hidden");
