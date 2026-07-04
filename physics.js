@@ -70,6 +70,7 @@ const Physics = (() => {
     railSpeedMax: 1250, // 発射強度100のレール速度
     maxBalls: 45,       // 同時最大玉数
     stuckTime: 2.5,     // この秒数ほぼ動かない玉は回収
+    strokeJitter: 0.025, // 発射ばらつき(レール速度±2.5%・離脱角±0.025rad)
   };
 
   const L = PACHI_LAYOUT;
@@ -133,8 +134,10 @@ const Physics = (() => {
     balls.push({
       phase: "rail",
       ang: Math.PI / 2,                 // 盤面円の最下部からスタート
-      spd: CONST.railSpeedMin + s * (CONST.railSpeedMax - CONST.railSpeedMin),
-      release: Math.PI * 0.95 + s * Math.PI * 0.72,  // 離脱角(強いほど上まで回る)
+      spd: (CONST.railSpeedMin + s * (CONST.railSpeedMax - CONST.railSpeedMin))
+           * (1 + (Math.random() - 0.5) * 2 * CONST.strokeJitter),
+      release: Math.PI * 0.95 + s * Math.PI * 0.72   // 離脱角(強いほど上まで回る)
+               + (Math.random() - 0.5) * 2 * CONST.strokeJitter,
       x: 0, y: 0, vx: 0, vy: 0, still: 0,
     });
   }
