@@ -628,10 +628,9 @@ const Game = (() => {
     if (state.balls <= 0) return;
     state.balls--;
     state.launches++;
-    if (chance(CONFIG.launch.startRate)) {
-      state.balls += CONFIG.payout.startPay;
-      addHold();
-    }
+    // 物理盤面へ発射(入賞はPhysics.initのコールバック経由)
+    const sl = document.getElementById("strength");
+    Physics.launch(sl ? +sl.value / 100 : 0.62);
     renderStats();
   }
 
@@ -688,6 +687,15 @@ const Game = (() => {
       c.style.width = "160px"; c.style.height = "200px";
     }
   }
+
+  /* --- 物理盤面と接続: スタート入賞で賞球+保留 --- */
+  Physics.init({
+    onStartIn: () => {
+      state.balls += CONFIG.payout.startPay;
+      addHold();
+      renderStats();
+    },
+  });
 
   applyAssets(); renderStats(); renderHolds();
   return { launchBall, isRush: () => state.mode === "RUSH", state };

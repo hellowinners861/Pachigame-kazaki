@@ -82,6 +82,12 @@
 
     <button class="fire-btn" id="fireBtn">🚀 玉を打つ(長押し / Space)</button>
 
+    <div class="strength-row">
+      <span>発射強度</span>
+      <input type="range" id="strength" min="0" max="100" value="62">
+      <span id="strengthVal">62%</span>
+    </div>
+
     <label class="auto-row">
       <input type="checkbox" id="autoChk"> 自動プレイ
     </label>
@@ -95,6 +101,7 @@
 </div>
 
 <script src="sfx.js"></script>
-<script src="script.js?v=8"></script>
+<script src="physics.js"></script>
+<script src="script.js?v=9"></script>
 </body>
 </html>

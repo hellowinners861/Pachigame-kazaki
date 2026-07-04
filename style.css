@@ -387,3 +387,13 @@ body {
   max-height: 74vh;   /* 縦長画像でも画面からはみ出さない上限 */
 }
 .lcd-bg { background-size: contain; background-repeat: no-repeat; }
+
+/* ===== 発射強度スライダー ===== */
+.strength-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--dim);
+  background: rgba(0,0,0,.35);
+  border-radius: 10px; padding: 8px 12px;
+}
+.strength-row input { flex: 1; accent-color: var(--neon-pink); }
+#strengthVal { min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
