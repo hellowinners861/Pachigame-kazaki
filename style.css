@@ -250,6 +250,58 @@ body {
 .flash.gold-flash { background: var(--gold); }
 @keyframes flashAnim { 0% { opacity: .95; } 100% { opacity: 0; } }
 
+
+
+/* ============ ステージ進行ルート ============ */
+.route-stage {
+  position: absolute;
+  left: 6%; right: 6%; bottom: 16%;
+  padding: 10px 12px;
+  border: 2px solid rgba(168,224,255,.75);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(3,10,24,.86), rgba(10,22,46,.78));
+  box-shadow: 0 0 18px rgba(74,184,255,.55), inset 0 0 18px rgba(74,184,255,.16);
+  z-index: 7;
+  animation: routeIn .3s ease-out;
+}
+.route-title {
+  font-size: 13px; font-weight: 900; letter-spacing: .16em;
+  color: var(--neon-pink-soft);
+  text-shadow: 0 0 10px var(--neon-pink);
+  margin-bottom: 6px;
+}
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.route-cell {
+  min-height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 7px;
+  background: rgba(255,255,255,.05);
+  color: rgba(238,244,255,.42);
+  font-size: 15px; font-weight: 900;
+}
+.route-cell.path {
+  color: #fff;
+  background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.24), rgba(74,184,255,.22));
+  border-color: rgba(168,224,255,.55);
+  box-shadow: 0 0 10px rgba(74,184,255,.32);
+}
+.route-cell.start { color: #07101f; background: var(--neon-pink-soft); }
+.route-cell.goal { color: #2d1600; background: var(--gold); box-shadow: 0 0 14px var(--gold); }
+.route-cell.up-terrain { border-color: rgba(74,255,157,.65); }
+.route-cell.down-terrain { border-color: rgba(176,76,255,.7); }
+.route-caption {
+  margin-top: 6px;
+  font-size: 12px; font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0,0,0,.9);
+}
+@keyframes routeIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
 /* ============ 右パネル ============ */
 .side {
   flex: 1;

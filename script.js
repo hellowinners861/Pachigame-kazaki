@@ -315,6 +315,99 @@ const Reels = (() => {
   return { flash: doFlash, shake: doShake, setBg, lampMode, crack: doCrack, alertRed };
 })();
 
+/* ============ 6.5 RouteStage(縦横ステージ進行) ============
+   右方向だけでなく、左へ戻る必要があるルートや、最終的に左側へ
+   ゴールするルートも混ぜる。上下移動には各5種類の地形を持たせる。 */
+const RouteStage = (() => {
+  const gridEl = document.getElementById("routeGrid");
+  const titleEl = document.getElementById("routeTitle");
+  const captionEl = document.getElementById("routeCaption");
+  const stageEl = document.getElementById("routeStage");
+  const W = 7, H = 4;
+
+  const VERTICAL_TERRAINS = {
+    U: [
+      { icon: "⛰", name: "氷壁の登り坂" },
+      { icon: "🌲", name: "霜林の尾根" },
+      { icon: "🪨", name: "岩場の急階段" },
+      { icon: "❄", name: "吹雪の稜線" },
+      { icon: "🌉", name: "吊り橋の上段" },
+    ],
+    D: [
+      { icon: "🕳", name: "雪穴の下降路" },
+      { icon: "💧", name: "氷瀑の滑り台" },
+      { icon: "🌫", name: "霧谷の下り坂" },
+      { icon: "🧊", name: "凍湖の低地" },
+      { icon: "🪜", name: "坑道の梯子" },
+    ],
+  };
+
+  const ROUTE_BLUEPRINTS = [
+    { name: "右上左折ルート", steps: "RRUULL", note: "右へ進んで上段から左のゴールを狙う" },
+    { name: "迂回リバースルート", steps: "RURDLL", note: "途中で左へ戻らないと突破できない" },
+    { name: "左ゴール奇襲ルート", steps: "RRUULLD", note: "縦横に展開した後、最終的に左側へ着地" },
+    { name: "氷谷ジグザグルート", steps: "URRDLU", note: "上下降を挟んで足場を切り替える" },
+    { name: "下降反転ルート", steps: "DRRULL", note: "下へ潜ってから左進行が必須になる" },
+    { name: "王道前進ルート", steps: "RRURRD", note: "右進行を軸に上下地形で発展" },
+  ];
+
+  function makeRoute() {
+    const blueprint = ROUTE_BLUEPRINTS[pickInt(ROUTE_BLUEPRINTS.length)];
+    let x = blueprint.steps[0] === "U" ? 2 : 1;
+    let y = blueprint.steps[0] === "D" ? 1 : 2;
+    const cells = [{ x, y, label: "S", cls: "start", terrain: "開始" }];
+    const terrainNames = [];
+
+    for (const dir of blueprint.steps) {
+      if (dir === "R") x = Math.min(W - 1, x + 1);
+      if (dir === "L") x = Math.max(0, x - 1);
+      if (dir === "U") y = Math.max(0, y - 1);
+      if (dir === "D") y = Math.min(H - 1, y + 1);
+
+      let label = dir === "R" ? "→" : dir === "L" ? "←" : "";
+      let cls = "path";
+      let terrain = dir === "R" ? "右進行" : dir === "L" ? "左進行" : "";
+      if (dir === "U" || dir === "D") {
+        const picked = VERTICAL_TERRAINS[dir][pickInt(VERTICAL_TERRAINS[dir].length)];
+        label = picked.icon;
+        cls += dir === "U" ? " up-terrain" : " down-terrain";
+        terrain = picked.name;
+        terrainNames.push(picked.name);
+      }
+      cells.push({ x, y, label, cls, terrain });
+    }
+    cells[cells.length - 1].label = "G";
+    cells[cells.length - 1].cls += " goal";
+    return { ...blueprint, cells, terrainNames };
+  }
+
+  function show() {
+    if (!stageEl || !gridEl) return;
+    const route = makeRoute();
+    const map = new Map(route.cells.map(c => [`${c.x},${c.y}`, c]));
+    gridEl.innerHTML = "";
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const c = map.get(`${x},${y}`);
+        const div = document.createElement("div");
+        div.className = "route-cell " + (c ? c.cls : "");
+        div.textContent = c ? c.label : "·";
+        div.title = c ? c.terrain : "未踏破";
+        gridEl.appendChild(div);
+      }
+    }
+    titleEl.textContent = route.name;
+    captionEl.textContent = `${route.note} / 地形: ${route.terrainNames.join("・") || "平地連続"}`;
+    stageEl.classList.remove("hidden");
+  }
+
+  function hide() {
+    if (stageEl) stageEl.classList.add("hidden");
+  }
+
+  return { show, hide, VERTICAL_TERRAINS, ROUTE_BLUEPRINTS };
+})();
+
 /* ============ 7. Director(変動演出の再生) ============
    パターン定義から setTimeout タイムラインを構築して再生。
    演出を数百種類に増やしても、この再生エンジンは共通。   */
@@ -329,6 +422,7 @@ const Director = (() => {
     yokokuEl.classList.add("hidden");
     cutinEl.classList.add("hidden");
     reachEl.classList.add("hidden");
+    RouteStage.hide();
   }
 
   function showYokoku(text, cls) {
@@ -420,7 +514,7 @@ const Director = (() => {
     });
 
     // --- SP発展(背景変化) ---
-    if (p.sp >= 1) at(tRight + 1500, () => { FX.setBg("bg-sp1"); FX.flash(); });
+    if (p.sp >= 1) at(tRight + 1500, () => { FX.setBg("bg-sp1"); FX.flash(); RouteStage.show(); });
     if (p.sp >= 2) at(tRight + 4500, () => { FX.setBg("bg-sp2"); FX.flash(); FX.shake(); });
 
     // --- 暗転・カットイン・当落ボタン ---
@@ -446,6 +540,7 @@ const Director = (() => {
     // --- 変動終了 ---
     at(p.dur, () => {
       reachEl.classList.add("hidden");
+      RouteStage.hide();
       if (judge.win) { Reels.markWin(); FX.flash(true); FX.lampMode("gold"); }
       else { SFX.lose(); FX.setBg(Game.isRush() ? "bg-rush" : ""); FX.lampMode(Game.isRush() ? "excited" : "calm"); }
       onDone(judge.win);
